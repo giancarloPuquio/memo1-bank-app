@@ -15,7 +15,7 @@ import java.util.Optional;
 public class AccountService {
 
     @Autowired
-    private AccountRepository accountRepository;
+    protected AccountRepository accountRepository;
 
     public Account createAccount(Account account) {
         return accountRepository.save(account);
