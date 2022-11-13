@@ -1,9 +1,9 @@
 package com.aninfo;
 
 import com.aninfo.model.Account;
-import com.aninfo.model.Transaccion;
+import com.aninfo.model.Transaction;
 import com.aninfo.service.AccountService;
-import com.aninfo.service.TransaccionService;
+import com.aninfo.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,7 +29,7 @@ public class Memo1BankApp {
 	private AccountService accountService;
 
 	@Autowired
-	private TransaccionService transaccionService;
+	private TransactionService transactionService;
 
 	public static void main(String[] args) {
 		SpringApplication.run(Memo1BankApp.class, args);
@@ -41,11 +41,6 @@ public class Memo1BankApp {
 		return accountService.createAccount(account);
 	}
 
-	@PostMapping("/transaccion")
-	@ResponseStatus(HttpStatus.CREATED)
-	public Transaccion createTransaccion(@RequestBody Transaccion transaccion) {
-		return transaccionService.createTransaccion(transaccion);
-	}
 
 	@GetMapping("/accounts")
 	public Collection<Account> getAccounts() {
@@ -58,10 +53,6 @@ public class Memo1BankApp {
 		return ResponseEntity.of(accountOptional);
 	}
 
-	@GetMapping("/transaccion")
-	public Collection<Transaccion> getTransaccions() {
-		return transaccionService.getTransaccions();
-	}
 
 	@PutMapping("/accounts/{cbu}")
 	public ResponseEntity<Account> updateAccount(@RequestBody Account account, @PathVariable Long cbu) {
@@ -75,27 +66,9 @@ public class Memo1BankApp {
 		return ResponseEntity.ok().build();
 	}
 
-	@GetMapping("/transaccion/{id}")
-	public ResponseEntity<Transaccion> getTransaccion(@PathVariable Long id) {
-		Optional<Transaccion> transaccionOptional = transaccionService.findById(id);
-		return ResponseEntity.of(transaccionOptional);
-	}
-
-	/*
-        @GetMapping("/transaccion/{cbuCuenta}")
-        public ResponseEntity<Transaccion> getCuenta(@PathVariable Long cbuCuenta) {
-            Optional<Transaccion> transaccionOptional = transaccionService.findById(cbuCuenta);
-            return ResponseEntity.of(transaccionOptional);
-        }*/
-
 	@DeleteMapping("/accounts/{cbu}")
 	public void deleteAccount(@PathVariable Long cbu) {
 		accountService.deleteById(cbu);
-	}
-
-	@DeleteMapping("/transaccions/{id}")
-	public void deleteTransaccion(@PathVariable Long id) {
-		transaccionService.deleteById(id);
 	}
 
 	@PutMapping("/accounts/{cbu}/withdraw")
@@ -106,6 +79,29 @@ public class Memo1BankApp {
 	@PutMapping("/accounts/{cbu}/deposit")
 	public Account deposit(@PathVariable Long cbu, @RequestParam Double sum) {
 		return accountService.deposit(cbu, sum);
+	}
+
+	@PostMapping("/transaction")
+	@ResponseStatus(HttpStatus.CREATED)
+	public Transaction createTransaction(@RequestBody Transaction transaction, @RequestParam Double monto, @RequestParam String tipo,
+										 @RequestParam Long cbu) {
+		return transactionService.createTransaction(transaction, monto, tipo, cbu, accountService);
+	}
+
+	@GetMapping("/transactions")
+	public Collection<Transaction> getTransactions() {
+		return transactionService.getTransactions();
+	}
+
+	@GetMapping("/transactions/{id}")
+	public ResponseEntity<Transaction> getTransaction(@PathVariable Long id) {
+		Optional<Transaction> transactionOptional = transactionService.findById(id);
+		return ResponseEntity.of(transactionOptional);
+	}
+
+	@DeleteMapping("/transactions/{id}")
+	public void deleteTransaction(@PathVariable Long id) {
+		transactionService.deleteById(id, accountService);
 	}
 
 	@Bean
